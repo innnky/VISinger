@@ -220,8 +220,8 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
 		scaler.step(optim_g)
 		scaler.update()
 		time_10 = time.time()
-		print("time:", time_2-time_1, time_4-time_3,time_5-time_4,time_6-time_5,time_7-time_6,time_8-time_7,time_9-time_8,
-		      time_10-time_9)
+		# print("time:", time_2-time_1, time_4-time_3,time_5-time_4,time_6-time_5,time_7-time_6,time_8-time_7,time_9-time_8,
+		#       time_10-time_9)
 		if rank == 0:
 			if global_step % hps.train.log_interval == 0:
 				lr = optim_g.param_groups[0]['lr']

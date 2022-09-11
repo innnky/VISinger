@@ -16,7 +16,7 @@ from torch.nn import Conv1d, ConvTranspose1d, AvgPool1d, Conv2d
 from torch.nn.utils import weight_norm, remove_weight_norm, spectral_norm
 from commons import init_weights, get_padding
 from frame_prior_network import ConformerBlock, VariancePredictor, ResidualConnectionModule
-from symbols import ctc_symbols
+from text.symbols import ctc_symbols
 
 
 class LengthRegulator(nn.Module):
@@ -256,10 +256,10 @@ class PhonemesPredictor(nn.Module):
 
     def forward(self, x, x_mask):
         phonemes_embedding = self.phonemes_predictor(x * x_mask, x_mask)
-        print("x_size:", x.size())
+        # print("x_size:", x.size())
         x1 = self.linear1(phonemes_embedding.transpose(1, 2))
         x1 = x1.log_softmax(2)
-        print("phonemes_embedding size:", x1.size())
+        # print("phonemes_embedding size:", x1.size())
         return x1.transpose(0, 1)
 
 
@@ -769,6 +769,8 @@ class SynthesizerTrn(nn.Module):
     logs_p = torch.matmul(attn.squeeze(1), logs_p.transpose(1, 2)).transpose(1, 2)
     z_slice, ids_slice = commons.rand_slice_segments(z, spec_lengths, self.segment_size)
     o = self.dec(z_slice, g=g)
+    # np.save("outwav.npy",o.cpu().detach().numpy())
+    # np.save("phonemes.npy",phonemes.cpu().detach().numpy())
     return o, l_length, l_pitch, attn, ids_slice, x_mask, y_mask, (z, z_p, m_p, logs_p, m_q, logs_q), ctc_loss
 
   def infer(self, phonemes, phonemes_lengths, notepitch,  notedur,
@@ -811,6 +813,7 @@ class SynthesizerTrn(nn.Module):
     z_p = m_p + torch.randn_like(m_p) * torch.exp(logs_p) * noise_scale
     z = self.flow(z_p, x_mask, g=g, reverse=True)
     o = self.dec((z * x_mask)[:, :, :max_len], g=g)
+    
     return o, x_mask, (z, z_p, m_p, logs_p)
 
   def voice_conversion(self, y, y_lengths, sid_src, sid_tgt):
