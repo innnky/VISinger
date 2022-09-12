@@ -22,11 +22,10 @@ from text.symbols import ctc_symbols
 class LengthRegulator(nn.Module):
     """Length Regulator"""
 
-    def __init__(self):
+    def __init__(self, hoplen=256, sr=24000):
         super(LengthRegulator, self).__init__()
-        self.winlen = 1024
-        self.hoplen = 256
-        self.sr = 44100
+        self.hoplen = hoplen
+        self.sr = sr
 
     def LR(self, x, notepitch, duration, x_lengths):
         output = list()
@@ -65,8 +64,8 @@ class LengthRegulator(nn.Module):
         predicted = predicted.squeeze()
         for i, vec in enumerate(batch):
             duration = predicted[i].item()
-            if self.sr * duration - self.winlen > 0:
-                expand_size = max((self.sr * duration - self.winlen) / self.hoplen, 1)
+            if self.sr * duration > 0:
+                expand_size = max((self.sr * duration) / self.hoplen, 1)
             elif duration == 0:
                 expand_size = 0
             else:
@@ -83,8 +82,8 @@ class LengthRegulator(nn.Module):
         for i, vec in enumerate(batch):
 
             duration = predicted[i].item()
-            if self.sr * duration - self.winlen > 0:
-                expand_size = max((self.sr * duration - self.winlen)/self.hoplen, 1)
+            if self.sr * duration > 0:
+                expand_size = max((self.sr * duration)/self.hoplen, 1)
             elif duration == 0:
                 expand_size = 0
             else:
@@ -650,6 +649,8 @@ class SynthesizerTrn(nn.Module):
   def __init__(self,
     n_vocab,
     spec_channels,
+    hop_length,
+    sampling_rate,
     segment_size,
     inter_channels,
     hidden_channels,
@@ -703,7 +704,7 @@ class SynthesizerTrn(nn.Module):
     self.flow = ResidualCouplingBlock(inter_channels, hidden_channels, 5, 1, 4, gin_channels=gin_channels)
     self.dp = DurationPredictor(hidden_channels, 256, 3, 0.5, gin_channels=gin_channels)
     self.project = Projection(hidden_channels, inter_channels)
-    self.lr = LengthRegulator()
+    self.lr = LengthRegulator(hop_length, sampling_rate)
     self.frame_prior_net = FramePriorNet(n_vocab, inter_channels, hidden_channels, filter_channels, n_heads, n_layers, kernel_size, p_dropout)
     # self.pitch_net = VariancePredictor()
     self.pitch_net = PitchPredictor(n_vocab, inter_channels, hidden_channels, filter_channels, n_heads, n_layers, kernel_size, p_dropout)
