@@ -186,14 +186,14 @@ class DurationPredictor(nn.Module):
   def __init__(self, in_channels, filter_channels, kernel_size, p_dropout, gin_channels=0):
     super().__init__()
 
-    self.in_channels = in_channels + 1
+    self.in_channels = in_channels + 2
     self.filter_channels = filter_channels
     self.kernel_size = kernel_size
     self.p_dropout = p_dropout
     self.gin_channels = gin_channels
 
     self.drop = nn.Dropout(p_dropout)
-    self.conv_1 = nn.Conv1d(in_channels + 1, filter_channels, kernel_size, padding=kernel_size//2)
+    self.conv_1 = nn.Conv1d(self.in_channels, filter_channels, kernel_size, padding=kernel_size//2)
     self.norm_1 = modules.LayerNorm(filter_channels)
     self.conv_2 = nn.Conv1d(filter_channels, filter_channels, kernel_size, padding=kernel_size//2)
     self.norm_2 = modules.LayerNorm(filter_channels)
@@ -725,12 +725,13 @@ class SynthesizerTrn(nn.Module):
     if n_speakers > 1:
       self.emb_g = nn.Embedding(n_speakers, gin_channels)
 
-  def forward(self, phonemes, phonemes_lengths, notepitch, notedur, phndur, spec, spec_lengths, sid=None):
+  def forward(self, phonemes, phonemes_lengths, notepitch, notedur, phndur,slurflag, spec, spec_lengths, sid=None):
     g = None
     x, x_mask = self.enc_p(phonemes, phonemes_lengths, notepitch, notedur)
     w = phndur.unsqueeze(1)
     logw_ = w * x_mask
-    logw = self.dp(x, x_mask, notedur, g=g)
+    dpx = torch.cat([x,slurflag.unsqueeze(1)],1)
+    logw = self.dp(dpx, x_mask, notedur, g=g)
     logw = torch.mul(logw.squeeze(1), notedur).unsqueeze(1)
     l_loss = torch.sum((logw - logw_)**2, [1, 2])
     x_mask_sum = torch.sum(x_mask)
@@ -786,12 +787,13 @@ class SynthesizerTrn(nn.Module):
     # np.save("phonemes.npy",phonemes.cpu().detach().numpy())
     return o, l_length, l_pitch, attn, ids_slice, x_mask, y_mask, (z, z_p, m_p, logs_p, m_q, logs_q), ctc_loss
 
-  def infer(self, phonemes, phonemes_lengths, notepitch,  notedur,
+  def infer(self, phonemes, phonemes_lengths, notepitch,  notedur, slurflag,
             sid=None, noise_scale=1, length_scale=1, noise_scale_w=1., max_len=None):
     g = None
     x, x_mask = self.enc_p(phonemes, phonemes_lengths, notepitch, notedur)
 
-    logw = self.dp(x, x_mask, notedur, g=g)
+    dpx = torch.cat([x, slurflag.unsqueeze(1)], 1)
+    logw = self.dp(dpx, x_mask, notedur, g=g)
     logw = torch.mul(logw.squeeze(1), notedur).unsqueeze(1)
     w = logw * x_mask * length_scale
     x_frame, frame_pitch, x_lengths = self.lr(x, notepitch, w, phonemes_lengths)

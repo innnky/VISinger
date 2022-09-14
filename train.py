@@ -167,7 +167,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
 		with autocast(enabled=hps.train.fp16_run):
 			time_3 = time.time()
 			y_hat, l_length, l_pitch, attn, ids_slice, x_mask, z_mask, \
-			(z, z_p, m_p, logs_p, m_q, logs_q), ctc_loss = net_g(phonemes, phonemes_lengths, notepitch, notedur,phndur,
+			(z, z_p, m_p, logs_p, m_q, logs_q), ctc_loss = net_g(phonemes, phonemes_lengths, notepitch, notedur,phndur,slurflag,
 			                                           spec, spec_lengths)
 			time_4 = time.time()
 			mel = spec_to_mel_torch(
@@ -296,7 +296,7 @@ def evaluate(hps, generator, eval_loader, writer_eval):
 			wav = wav[:1]
 			wav_lengths = wav_lengths[:1]
 			break
-		y_hat, mask, xx = generator.module.infer(phonemes, phonemes_lengths, notepitch, notedur,
+		y_hat, mask, xx = generator.module.infer(phonemes, phonemes_lengths, notepitch, notedur,slurflag,
 		                                               max_len=1000)
 		y_hat_lengths = mask.sum([1, 2]).long() * hps.data.hop_length
 
