@@ -1,7 +1,7 @@
 from text.pitch_id import pitch_id
 from text import text_to_sequence, _symbol_to_id
 import torch
-from pypinyin import  lazy_pinyin
+from pypinyin import lazy_pinyin
 from text.ph_map import ph_map
 import librosa
 import numpy as np
@@ -9,6 +9,7 @@ import numpy as np
 """
 from https://huggingface.co/spaces/Silentlin/DiffSinger
 """
+
 
 def preprocess_word_level_input(inp):
     # Pypinyin can't solve polyphonic words
@@ -84,9 +85,9 @@ def preprocess_phoneme_level_input(inp):
     ph_seq = inp['ph_seq']
     note_lst = inp['note_seq'].split()
     midi_dur_lst = inp['note_dur_seq'].split()
-    # is_slur = inp['is_slur_seq'].split()
-    is_slur = None
-    
+    is_slur = [int(i) for i in inp['is_slur_seq'].split()]
+    # is_slur = None
+
     print(len(note_lst), len(ph_seq.split()), len(midi_dur_lst))
     if len(note_lst) == len(ph_seq.split()) == len(midi_dur_lst):
         print('Pass word-notes check.')
@@ -123,7 +124,7 @@ def preprocess_input(inp):
     # convert note lst to midi id; convert note dur lst to midi duration
     try:
         midis = [librosa.note_to_midi(x.split("/")[0]) if x != 'rest' else 0
-                  for x in note_lst]
+                 for x in note_lst]
         midi_dur_lst = [float(x) for x in midi_dur_lst]
     except Exception as e:
         print(e)
@@ -131,7 +132,7 @@ def preprocess_input(inp):
         return None
     # print(ph_seq)
     ph_token = [_symbol_to_id[i] for i in ph_seq.split(" ")]
-    item = { 'ph': ph_seq,
+    item = {'ph': ph_seq,
             'ph_token': ph_token, 'pitch_midi': np.asarray(midis), 'midi_dur': np.asarray(midi_dur_lst),
             'is_slur': np.asarray(is_slur), }
     item['ph_len'] = len(item['ph_token'])
