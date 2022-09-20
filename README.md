@@ -3,7 +3,12 @@
 
 效果不好已弃坑
 audio sample
-https://user-images.githubusercontent.com/67028263/191379221-fd42cee6-2703-4501-b2b2-2db941d85d83.mp4
+
+
+
+https://user-images.githubusercontent.com/67028263/191379294-5ab6a75c-5902-4f50-86a1-c060aad2eecd.mp4
+
+
 
 VISinger: Variational Inference with Adversarial Learning for End-to-End Singing Voice Synthesis [paper](https://arxiv.org/abs/2110.08813)
 
