@@ -1,7 +1,9 @@
 # Unofficial implementation of VISinger
 <a href="https://colab.research.google.com/drive/17UIpDlZ6jgm_HzELsv-UyF_zpcn6NpvS?usp=sharing" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-[pretrained model](https://drive.google.com/file/d/1kSXL9hLy23MPkKQMioDlrXISsw-9VRKM/view)
+效果不好已弃坑
+audio sample
+https://user-images.githubusercontent.com/67028263/191379221-fd42cee6-2703-4501-b2b2-2db941d85d83.mp4
 
 VISinger: Variational Inference with Adversarial Learning for End-to-End Singing Voice Synthesis [paper](https://arxiv.org/abs/2110.08813)
 
@@ -22,6 +24,9 @@ cd monotonic_align
 python setup.py build_ext --inplace
 
 ```
+
+
+
 
 
 ## Training Exmaple
