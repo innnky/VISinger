@@ -1,5 +1,4 @@
 # Unofficial implementation of VISinger
-<a href="https://colab.research.google.com/drive/17UIpDlZ6jgm_HzELsv-UyF_zpcn6NpvS?usp=sharing" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 [pretrained model](https://drive.google.com/file/d/1kSXL9hLy23MPkKQMioDlrXISsw-9VRKM/view)
 
